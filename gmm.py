@@ -2,7 +2,13 @@ import numpy as np
 import cv2
 
 def normal_pdf(x, mu, sigma):
-    return 1.0 / (sigma * (2.0 * np.pi)**(1/2)) * np.exp(-1.0 * (x - mu)**2 / (2.0 * (sigma**2)))
+    y = 0
+    try:
+        y = 1.0 / ((sigma * (2.0 * np.pi) ** (1 / 2)) * np.exp((x - mu) ** 2 / (2.0 * (sigma ** 2))))
+    except:
+        RuntimeWarning
+    print(y)
+    return y
 
 def sort(x):
     return 0
@@ -33,7 +39,7 @@ background = np.zeros([row,col],np.uint8)
 
 gauss_fit_index = np.zeros([row,col])
 
-alpha = 0.4
+alpha = 0.8
 T = 0.7
 
 while cap.isOpened():
@@ -188,7 +194,6 @@ while cap.isOpened():
     frame_gray = frame_gray.astype(np.uint8)
     frame_gray[fore_index] = np.uint([0])
 
-    print(omega_g3)
     cv2.imshow('frame',frame_gray)
     if cv2.waitKey(1) & 0xFF == 27:
         break
