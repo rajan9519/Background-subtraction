@@ -9,7 +9,7 @@ def sort(x):
 
 # 1 is most probable and 3 is least probable
 
-cap = cv2.VideoCapture('cars.mp4')
+cap = cv2.VideoCapture(0)
 _,frame = cap.read()
 
 row,col,_ = frame.shape
@@ -96,12 +96,99 @@ while cap.isOpened():
 
     omega_by_sigma_1 = omega_g1/sigma1
     omega_by_sigma_2 = omega_g2 / sigma2
-    omega_by_sigma_3 = omega_g3 / sigma3    
-    
+    omega_by_sigma_3 = omega_g3 / sigma3
+
+    #m_1_2_3 = np.where((omega_by_sigma_1 >= omega_by_sigma_2) & (omega_by_sigma_2 >= omega_by_sigma_3))
+    m_2_1_3 = np.where((omega_by_sigma_2 >= omega_by_sigma_1) & (omega_by_sigma_1 >= omega_by_sigma_3))
+    m_3_2_1 = np.where((omega_by_sigma_3 >= omega_by_sigma_2) & (omega_by_sigma_2 >= omega_by_sigma_1))
+    m_1_3_2 = np.where((omega_by_sigma_1 >= omega_by_sigma_3) & (omega_by_sigma_3 >= omega_by_sigma_2))
+    m_2_3_1 = np.where((omega_by_sigma_2 >= omega_by_sigma_3) & (omega_by_sigma_3 >= omega_by_sigma_1))
+    m_3_1_2 = np.where((omega_by_sigma_3 >= omega_by_sigma_1) & (omega_by_sigma_1 >= omega_by_sigma_2))
+
+    temp = mean_g1[m_2_1_3]
+    mean_g1[m_2_1_3] = mean_g2[m_2_1_3]
+    mean_g2[m_2_1_3] = temp
+
+    temp = mean_g3[m_3_2_1]
+    mean_g3[m_3_2_1] = mean_g1[m_3_2_1]
+    mean_g1[m_3_2_1] = temp
+
+    temp = mean_g3[m_1_3_2]
+    mean_g3[m_1_3_2] = mean_g2[m_1_3_2]
+    mean_g2[m_1_3_2] = temp
+
+    temp = mean_g1[m_2_3_1]
+    mean_g1[m_2_3_1] = mean_g2[m_2_3_1]
+    mean_g2[m_2_3_1] = mean_g3[m_2_3_1]
+    mean_g3[m_2_3_1] = temp
+
+    temp = mean_g3[m_3_1_2]
+    mean_g3[m_3_1_2] = mean_g2[m_3_1_2]
+    mean_g2[m_3_1_2] = mean_g1[m_3_1_2]
+    mean_g1[m_3_1_2] = temp
+
+    temp = variance_g1[m_2_1_3]
+    variance_g1[m_2_1_3] = variance_g2[m_2_1_3]
+    variance_g2[m_2_1_3] = temp
+
+    temp = variance_g3[m_3_2_1]
+    variance_g3[m_3_2_1] = variance_g1[m_3_2_1]
+    variance_g1[m_3_2_1] = temp
+
+    temp = variance_g3[m_1_3_2]
+    variance_g3[m_1_3_2] = variance_g2[m_1_3_2]
+    variance_g2[m_1_3_2] = temp
+
+    temp = variance_g1[m_2_3_1]
+    variance_g1[m_2_3_1] = variance_g2[m_2_3_1]
+    variance_g2[m_2_3_1] = variance_g3[m_2_3_1]
+    variance_g3[m_2_3_1] = temp
+
+    temp = variance_g3[m_3_1_2]
+    variance_g3[m_3_1_2] = variance_g2[m_3_1_2]
+    variance_g2[m_3_1_2] = variance_g1[m_3_1_2]
+    variance_g1[m_3_1_2] = temp
+
+    temp = omega_g1[m_2_1_3]
+    omega_g1[m_2_1_3] = omega_g2[m_2_1_3]
+    omega_g2[m_2_1_3] = temp
+
+    temp = omega_g3[m_3_2_1]
+    omega_g3[m_3_2_1] = omega_g1[m_3_2_1]
+    omega_g1[m_3_2_1] = temp
+
+    temp = omega_g3[m_1_3_2]
+    omega_g3[m_1_3_2] = omega_g2[m_1_3_2]
+    omega_g2[m_1_3_2] = temp
+
+    temp = omega_g1[m_2_3_1]
+    omega_g1[m_2_3_1] = omega_g2[m_2_3_1]
+    omega_g2[m_2_3_1] = omega_g3[m_2_3_1]
+    omega_g3[m_2_3_1] = temp
+
+    temp = omega_g3[m_3_1_2]
+    omega_g3[m_3_1_2] = omega_g2[m_3_1_2]
+    omega_g2[m_3_1_2] = omega_g1[m_3_1_2]
+    omega_g1[m_3_1_2] = temp
+
+    sigma1 = np.sqrt(variance_g1)
+    sigma2 = np.sqrt(variance_g2)
+    #sigma3 = np.sqrt(variance_g3)
+
+    compare_val_1 = cv2.absdiff(frame_gray, mean_g1)
+    compare_val_2 = cv2.absdiff(frame_gray, mean_g2)
+    #compare_val_3 = cv2.absdiff(frame_gray, mean_g3)
+
+    value1 = 2.5 * sigma1
+    value2 = 2.5 * sigma2
+    #value3 = 2.5 * sigma3
+
+    fore_index = np.where((compare_val_1>value1))
+
     frame_gray = frame_gray.astype(np.uint8)
-    frame_gray[not_match_index] = np.uint([0])
+    frame_gray[fore_index] = np.uint([0])
 
-
+    print(omega_g3)
     cv2.imshow('frame',frame_gray)
     if cv2.waitKey(1) & 0xFF == 27:
         break
