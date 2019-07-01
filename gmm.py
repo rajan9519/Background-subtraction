@@ -92,7 +92,7 @@ while cap.isOpened():
     sum = np.sum(omega,axis=0)
     omega = omega/sum
 
-    omega_by_sigma[0] = omega[0] / sigma1mean
+    omega_by_sigma[0] = omega[0] / sigma1
     omega_by_sigma[1] = omega[1] / sigma2
     omega_by_sigma[2] = omega[2] / sigma3
 
@@ -102,6 +102,10 @@ while cap.isOpened():
     mean = np.take_along_axis(mean,index,axis=0)
     variance = np.take_along_axis(variance,index,axis=0)
     omega = np.take_along_axis(omega,index,axis=0)
+
+    variance[0] = np.where(variance[0] < 0, 400, variance[0])
+    variance[1] = np.where(variance[1] < 0, 400, variance[1])
+    variance[2] = np.where(variance[2] < 0, 400, variance[2])
 
     sigma1 = np.sqrt(variance[0])
     sigma2 = np.sqrt(variance[1])
@@ -131,10 +135,8 @@ while cap.isOpened():
     temp[index] = temp[index]+1
     index2 = np.where(temp==2)
     background[index] = frame_gray[index]
-    index = np.where(variance[2]<0)
-    print(index)
     cv2.imshow('BACKGROUND',background)
-    cv2.imshow('frame',frame_gray)
+    cv2.imshow('frame',cv2.subtract(frame_gray,background))
     if cv2.waitKey(1) & 0xFF == 27:
         break
 cap.release()
