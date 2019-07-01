@@ -32,9 +32,9 @@ while cap.isOpened():
     frame_gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
     frame_gray = frame_gray.astype(np.float64)
 
-    variance[0] = np.where(variance[0] < 0, 0.0001, variance[0])
-    variance[1] = np.where(variance[1] < 0, 0.0001, variance[1])
-    variance[2] = np.where(variance[2] < 0, 0.0001, variance[2])
+    variance[0] = np.where(variance[0] < 0, 400, variance[0])
+    variance[1] = np.where(variance[1] < 0, 400, variance[1])
+    variance[2] = np.where(variance[2] < 0, 400, variance[2])
     sigma1 = np.sqrt(variance[0])
     sigma2 = np.sqrt(variance[1])
     sigma3 = np.sqrt(variance[2])
@@ -62,7 +62,7 @@ while cap.isOpened():
 
     rho = alpha * norm.pdf(frame_gray[gauss_fit_index1], mean[0][gauss_fit_index1], sigma1[gauss_fit_index1])
     constant = rho * ((frame_gray[gauss_fit_index1] - mean[0][gauss_fit_index1]) ** 2)
-    constant = np.where(constant<0.00000001,400,constant)
+    constant = np.where(constant<0.00000001,0,constant)
     mean[0][gauss_fit_index1] = (1 - rho) * mean[0][gauss_fit_index1] + rho * frame_gray[gauss_fit_index1]
     variance[0][gauss_fit_index1] = (1 - rho) * variance[0][gauss_fit_index1] + constant
     omega[0][gauss_fit_index1] = (1 - alpha) * omega[0][gauss_fit_index1] + alpha
@@ -70,7 +70,7 @@ while cap.isOpened():
 
     rho = alpha * norm.pdf(frame_gray[gauss_fit_index2], mean[1][gauss_fit_index2], sigma2[gauss_fit_index2])
     constant = rho * ((frame_gray[gauss_fit_index2] - mean[1][gauss_fit_index2]) ** 2)
-    constant = np.where(constant < 0.00000001, 400, constant)
+    constant = np.where(constant < 0.00000001, 0, constant)
     mean[1][gauss_fit_index2] = (1 - rho) * mean[1][gauss_fit_index2] + rho * frame_gray[gauss_fit_index2]
     variance[1][gauss_fit_index2] = (1 - rho) * variance[1][gauss_fit_index2] + rho * constant
     omega[1][gauss_fit_index2] = (1 - alpha) * omega[1][gauss_fit_index2] + alpha
@@ -78,7 +78,7 @@ while cap.isOpened():
 
     rho = alpha * norm.pdf(frame_gray[gauss_fit_index3], mean[2][gauss_fit_index3], sigma3[gauss_fit_index3])
     constant = rho * ((frame_gray[gauss_fit_index3] - mean[2][gauss_fit_index3]) ** 2)
-    constant = np.where(constant < 0.00000001, 400, constant)
+    constant = np.where(constant < 0.00000001, 0, constant)
     mean[2][gauss_fit_index3] = (1 - rho) * mean[2][gauss_fit_index3] + rho * frame_gray[gauss_fit_index3]
     variance[2][gauss_fit_index3] = (1 - rho) * variance[2][gauss_fit_index3] + constant
     omega[2][gauss_fit_index3] = (1 - alpha) * omega[2][gauss_fit_index3] + alpha
@@ -92,7 +92,7 @@ while cap.isOpened():
     sum = np.sum(omega,axis=0)
     omega = omega/sum
 
-    omega_by_sigma[0] = omega[0] / sigma1
+    omega_by_sigma[0] = omega[0] / sigma1mean
     omega_by_sigma[1] = omega[1] / sigma2
     omega_by_sigma[2] = omega[2] / sigma3
 
