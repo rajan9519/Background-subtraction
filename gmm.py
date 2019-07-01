@@ -1,59 +1,47 @@
 import numpy as np
 import cv2
+from scipy.stats import norm
 
-def normal_pdf(x, mu, sigma):
-    y = 0
-    try:
-        y = 1.0 / ((sigma * (2.0 * np.pi) ** (1 / 2)) * np.exp((x - mu) ** 2 / (2.0 * (sigma ** 2))))
-    except:
-        RuntimeWarning
-    print(y)
-    return y
-
-def sort(x):
-    return 0
-
-# 1 is most probable and 3 is least probable
+# 2 is most probable and 0 is least probable
 
 cap = cv2.VideoCapture(0)
 _,frame = cap.read()
 
 row,col,_ = frame.shape
 
-mean_g1 = np.zeros([row,col],np.float64)
-mean_g2 = np.zeros([row,col],np.float64)
-mean_g3 = np.zeros([row,col],np.float64)
+mean = np.zeros([3,row,col],np.float64)
 
-variance_g1 = np.ones([row,col],np.float64)
-variance_g2 = np.ones([row,col],np.float64)
-variance_g3 = np.ones([row,col],np.float64)
-variance_g1[:,:],variance_g2[:,:],variance_g3[:,:] = 200,200,200
+variance = np.zeros([3,row,col],np.float64)
+variance[:,:,:] = 400
 
-omega_g1 = np.ones([row,col],np.float64)
-omega_g2 = np.ones([row,col],np.float64)
-omega_g3 = np.ones([row,col],np.float64)
-omega_g1[:,:],omega_g2[:,:],omega_g3[:,:] = 1,0,0
+omega = np.zeros([3,row,col],np.float64)
+omega[0,:,:],omega[1,:,:],omega[2,:,:] = 0.1,0.2,0.7
+
+omega_by_sigma = np.zeros([3,row,col],np.float64)
 
 foreground = np.zeros([row,col],np.uint8)
 background = np.zeros([row,col],np.uint8)
 
 gauss_fit_index = np.zeros([row,col])
 
-alpha = 0.8
-T = 0.7
+alpha = 0.3
+T = 0.8
 
 while cap.isOpened():
     _,frame = cap.read()
     frame_gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
     frame_gray = frame_gray.astype(np.float64)
 
-    sigma1 = np.sqrt(variance_g1)
-    sigma2 = np.sqrt(variance_g2)
-    sigma3 = np.sqrt(variance_g3)
+    variance[0] = np.where(variance[0] < 0, 0.0001, variance[0])
+    variance[1] = np.where(variance[1] < 0, 0.0001, variance[1])
+    variance[2] = np.where(variance[2] < 0, 0.0001, variance[2])
+    sigma1 = np.sqrt(variance[0])
+    sigma2 = np.sqrt(variance[1])
+    sigma3 = np.sqrt(variance[2])
 
-    compare_val_1 = cv2.absdiff(frame_gray,mean_g1)
-    compare_val_2 = cv2.absdiff(frame_gray,mean_g2)
-    compare_val_3 = cv2.absdiff(frame_gray,mean_g3)
+    compare_val_1 = cv2.absdiff(frame_gray,mean[0])
+    compare_val_2 = cv2.absdiff(frame_gray,mean[1])
+    compare_val_3 = cv2.absdiff(frame_gray,mean[2])
 
     value1 = 2.5 * sigma1
     value2 = 2.5 * sigma2
@@ -72,128 +60,80 @@ while cap.isOpened():
     match_index[gauss_fit_index3] = 1
     not_match_index = np.where(match_index == 0)
 
-    rho = alpha * normal_pdf(frame_gray, mean_g1, sigma1)
-    mean_g1[gauss_fit_index1] = (1 - rho[gauss_fit_index1]) * mean_g1[gauss_fit_index1] + rho[gauss_fit_index1] * frame_gray[gauss_fit_index1]
-    variance_g1[gauss_fit_index1] = (1 - rho[gauss_fit_index1]) * (sigma1[gauss_fit_index1] ** 2) + rho[gauss_fit_index1] * ((frame_gray[gauss_fit_index1] - mean_g1[gauss_fit_index1]) ** 2)
-    omega_g1[gauss_fit_index1] = (1 - alpha) * omega_g1[gauss_fit_index1] + alpha
-    omega_g1[gauss_not_fit_index1] = (1 - alpha) * omega_g1[gauss_not_fit_index1]
+    rho = alpha * norm.pdf(frame_gray[gauss_fit_index1], mean[0][gauss_fit_index1], sigma1[gauss_fit_index1])
+    constant = rho * ((frame_gray[gauss_fit_index1] - mean[0][gauss_fit_index1]) ** 2)
+    constant = np.where(constant<0.00000001,400,constant)
+    mean[0][gauss_fit_index1] = (1 - rho) * mean[0][gauss_fit_index1] + rho * frame_gray[gauss_fit_index1]
+    variance[0][gauss_fit_index1] = (1 - rho) * variance[0][gauss_fit_index1] + constant
+    omega[0][gauss_fit_index1] = (1 - alpha) * omega[0][gauss_fit_index1] + alpha
+    omega[0][gauss_not_fit_index1] = (1 - alpha) * omega[0][gauss_not_fit_index1]
 
-    rho = alpha * normal_pdf(frame_gray, mean_g2, sigma2)
-    mean_g2[gauss_fit_index2] = (1 - rho[gauss_fit_index2]) * mean_g2[gauss_fit_index2] + rho[gauss_fit_index2] * frame_gray[gauss_fit_index2]
-    variance_g2[gauss_fit_index2] = (1 - rho[gauss_fit_index2]) * (sigma2[gauss_fit_index2] ** 2) + rho[gauss_fit_index2] * ((frame_gray[gauss_fit_index2] - mean_g2[gauss_fit_index2]) ** 2)
-    omega_g2[gauss_fit_index2] = (1 - alpha) * omega_g2[gauss_fit_index2] + alpha
-    omega_g2[gauss_not_fit_index2] = (1 - alpha) * omega_g2[gauss_not_fit_index2]
+    rho = alpha * norm.pdf(frame_gray[gauss_fit_index2], mean[1][gauss_fit_index2], sigma2[gauss_fit_index2])
+    constant = rho * ((frame_gray[gauss_fit_index2] - mean[1][gauss_fit_index2]) ** 2)
+    constant = np.where(constant < 0.00000001, 400, constant)
+    mean[1][gauss_fit_index2] = (1 - rho) * mean[1][gauss_fit_index2] + rho * frame_gray[gauss_fit_index2]
+    variance[1][gauss_fit_index2] = (1 - rho) * variance[1][gauss_fit_index2] + rho * constant
+    omega[1][gauss_fit_index2] = (1 - alpha) * omega[1][gauss_fit_index2] + alpha
+    omega[1][gauss_not_fit_index2] = (1 - alpha) * omega[1][gauss_not_fit_index2]
 
-    rho = alpha * normal_pdf(frame_gray, mean_g3, sigma3)
-    mean_g3[gauss_fit_index3] = (1 - rho[gauss_fit_index3]) * mean_g3[gauss_fit_index3] + rho[gauss_fit_index3] * frame_gray[gauss_fit_index3]
-    variance_g3[gauss_fit_index3] = (1 - rho[gauss_fit_index3]) * (sigma3[gauss_fit_index3] ** 2) + rho[gauss_fit_index3] * ((frame_gray[gauss_fit_index3] - mean_g3[gauss_fit_index3]) ** 2)
-    omega_g3[gauss_fit_index3] = (1 - alpha) * omega_g1[gauss_fit_index3] + alpha
-    omega_g3[gauss_not_fit_index3] = (1 - alpha) * omega_g1[gauss_not_fit_index3]
+    rho = alpha * norm.pdf(frame_gray[gauss_fit_index3], mean[2][gauss_fit_index3], sigma3[gauss_fit_index3])
+    constant = rho * ((frame_gray[gauss_fit_index3] - mean[2][gauss_fit_index3]) ** 2)
+    constant = np.where(constant < 0.00000001, 400, constant)
+    mean[2][gauss_fit_index3] = (1 - rho) * mean[2][gauss_fit_index3] + rho * frame_gray[gauss_fit_index3]
+    variance[2][gauss_fit_index3] = (1 - rho) * variance[2][gauss_fit_index3] + constant
+    omega[2][gauss_fit_index3] = (1 - alpha) * omega[2][gauss_fit_index3] + alpha
+    omega[2][gauss_not_fit_index3] = (1 - alpha) * omega[2][gauss_not_fit_index3]
 
-    mean_g3[not_match_index] = frame_gray[not_match_index]
-    variance_g3[not_match_index] = 200
-    omega_g3[not_match_index] = 0.01
+    mean[0][not_match_index] = frame_gray[not_match_index]
+    variance[0][not_match_index] = 200
+    omega[0][not_match_index] = 0.01
 
     # normalise omega
-    sum = omega_g1 + omega_g2 + omega_g3
-    omega_g1 = omega_g1/sum
-    omega_g2 = omega_g2/sum
-    omega_g3 = omega_g3/sum
+    sum = np.sum(omega,axis=0)
+    omega = omega/sum
 
-    omega_by_sigma_1 = omega_g1/sigma1
-    omega_by_sigma_2 = omega_g2 / sigma2
-    omega_by_sigma_3 = omega_g3 / sigma3
+    omega_by_sigma[0] = omega[0] / sigma1
+    omega_by_sigma[1] = omega[1] / sigma2
+    omega_by_sigma[2] = omega[2] / sigma3
 
-    #m_1_2_3 = np.where((omega_by_sigma_1 >= omega_by_sigma_2) & (omega_by_sigma_2 >= omega_by_sigma_3))
-    m_2_1_3 = np.where((omega_by_sigma_2 >= omega_by_sigma_1) & (omega_by_sigma_1 >= omega_by_sigma_3))
-    m_3_2_1 = np.where((omega_by_sigma_3 >= omega_by_sigma_2) & (omega_by_sigma_2 >= omega_by_sigma_1))
-    m_1_3_2 = np.where((omega_by_sigma_1 >= omega_by_sigma_3) & (omega_by_sigma_3 >= omega_by_sigma_2))
-    m_2_3_1 = np.where((omega_by_sigma_2 >= omega_by_sigma_3) & (omega_by_sigma_3 >= omega_by_sigma_1))
-    m_3_1_2 = np.where((omega_by_sigma_3 >= omega_by_sigma_1) & (omega_by_sigma_1 >= omega_by_sigma_2))
+    index = np.argsort(omega_by_sigma,axis=0)
+    omega_by_sigma = np.take_along_axis(omega_by_sigma,index,axis=0)
 
-    temp = mean_g1[m_2_1_3]
-    mean_g1[m_2_1_3] = mean_g2[m_2_1_3]
-    mean_g2[m_2_1_3] = temp
+    mean = np.take_along_axis(mean,index,axis=0)
+    variance = np.take_along_axis(variance,index,axis=0)
+    omega = np.take_along_axis(omega,index,axis=0)
 
-    temp = mean_g3[m_3_2_1]
-    mean_g3[m_3_2_1] = mean_g1[m_3_2_1]
-    mean_g1[m_3_2_1] = temp
+    sigma1 = np.sqrt(variance[0])
+    sigma2 = np.sqrt(variance[1])
+    sigma3 = np.sqrt(variance[2])
 
-    temp = mean_g3[m_1_3_2]
-    mean_g3[m_1_3_2] = mean_g2[m_1_3_2]
-    mean_g2[m_1_3_2] = temp
-
-    temp = mean_g1[m_2_3_1]
-    mean_g1[m_2_3_1] = mean_g2[m_2_3_1]
-    mean_g2[m_2_3_1] = mean_g3[m_2_3_1]
-    mean_g3[m_2_3_1] = temp
-
-    temp = mean_g3[m_3_1_2]
-    mean_g3[m_3_1_2] = mean_g2[m_3_1_2]
-    mean_g2[m_3_1_2] = mean_g1[m_3_1_2]
-    mean_g1[m_3_1_2] = temp
-
-    temp = variance_g1[m_2_1_3]
-    variance_g1[m_2_1_3] = variance_g2[m_2_1_3]
-    variance_g2[m_2_1_3] = temp
-
-    temp = variance_g3[m_3_2_1]
-    variance_g3[m_3_2_1] = variance_g1[m_3_2_1]
-    variance_g1[m_3_2_1] = temp
-
-    temp = variance_g3[m_1_3_2]
-    variance_g3[m_1_3_2] = variance_g2[m_1_3_2]
-    variance_g2[m_1_3_2] = temp
-
-    temp = variance_g1[m_2_3_1]
-    variance_g1[m_2_3_1] = variance_g2[m_2_3_1]
-    variance_g2[m_2_3_1] = variance_g3[m_2_3_1]
-    variance_g3[m_2_3_1] = temp
-
-    temp = variance_g3[m_3_1_2]
-    variance_g3[m_3_1_2] = variance_g2[m_3_1_2]
-    variance_g2[m_3_1_2] = variance_g1[m_3_1_2]
-    variance_g1[m_3_1_2] = temp
-
-    temp = omega_g1[m_2_1_3]
-    omega_g1[m_2_1_3] = omega_g2[m_2_1_3]
-    omega_g2[m_2_1_3] = temp
-
-    temp = omega_g3[m_3_2_1]
-    omega_g3[m_3_2_1] = omega_g1[m_3_2_1]
-    omega_g1[m_3_2_1] = temp
-
-    temp = omega_g3[m_1_3_2]
-    omega_g3[m_1_3_2] = omega_g2[m_1_3_2]
-    omega_g2[m_1_3_2] = temp
-
-    temp = omega_g1[m_2_3_1]
-    omega_g1[m_2_3_1] = omega_g2[m_2_3_1]
-    omega_g2[m_2_3_1] = omega_g3[m_2_3_1]
-    omega_g3[m_2_3_1] = temp
-
-    temp = omega_g3[m_3_1_2]
-    omega_g3[m_3_1_2] = omega_g2[m_3_1_2]
-    omega_g2[m_3_1_2] = omega_g1[m_3_1_2]
-    omega_g1[m_3_1_2] = temp
-
-    sigma1 = np.sqrt(variance_g1)
-    sigma2 = np.sqrt(variance_g2)
-    #sigma3 = np.sqrt(variance_g3)
-
-    compare_val_1 = cv2.absdiff(frame_gray, mean_g1)
-    compare_val_2 = cv2.absdiff(frame_gray, mean_g2)
-    #compare_val_3 = cv2.absdiff(frame_gray, mean_g3)
+    compare_val_1 = cv2.absdiff(frame_gray, mean[0])
+    compare_val_2 = cv2.absdiff(frame_gray, mean[1])
+    compare_val_3 = cv2.absdiff(frame_gray, mean[2])
 
     value1 = 2.5 * sigma1
     value2 = 2.5 * sigma2
-    #value3 = 2.5 * sigma3
-
-    fore_index = np.where((compare_val_1>value1))
-
+    value3 = 2.5 * sigma3
     frame_gray = frame_gray.astype(np.uint8)
-    frame_gray[fore_index] = np.uint([0])
 
+    fore_index1 = np.where(omega[2]>T)
+    fore_index2 = np.where(((omega[2]+omega[1])>T) & (omega[2]<T))
+    temp = np.zeros([row,col])
+    temp[fore_index1] = 1
+    index = np.where(compare_val_3<=value3)
+    temp[index] = temp[index]+1
+    index2 = np.where(temp==2)
+    background[index2] = frame_gray[index2]
+
+    temp = np.zeros([row,col])
+    temp[fore_index2] = 1
+    index = np.where((compare_val_3<=value3)|(compare_val_2<=value2))
+    temp[index] = temp[index]+1
+    index2 = np.where(temp==2)
+    background[index] = frame_gray[index]
+    index = np.where(variance[2]<0)
+    print(index)
+    cv2.imshow('BACKGROUND',background)
     cv2.imshow('frame',frame_gray)
     if cv2.waitKey(1) & 0xFF == 27:
         break
