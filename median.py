@@ -23,8 +23,8 @@ background = np.median(images,axis=0)
 background = background.astype(np.uint8)
 res = np.zeros([row,col],np.uint8)
 
-# converting interger 0 and 1 to type uint8
-a = np.uint8([1])
+# converting interger 0 and 255 to type uint8
+a = np.uint8([255])
 b = np.uint8([0])
 
 # initialising i so that we can replace frames from images to get new frames
