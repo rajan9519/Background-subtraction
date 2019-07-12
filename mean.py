@@ -17,25 +17,22 @@ while True:
 	cv2.imshow('image',frame)
 	dim = (500,500)
 	frame = cv2.resize(frame,dim,interpolation = cv2.INTER_AREA) 
-#converting images into grayscale       
-                                                
-	
-
+        #converting images into grayscale       
 	frame_gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
-	 
-        
-       
+    
 	images.append(frame_gray)
-	
+	# removing the images after every 50 image
 	if len(images)==50:
 	        images.pop(0)
 
 	image = np.array(images)
+	# gettting the tracker value
 	val = cv2.getTrackbarPos('val','tracker')
 	image = np.mean(image,axis=0)
 	image = image.astype(np.uint8)
 	cv2.imshow('background',image)
 	image = image.astype(np.uint8)
+	# foreground will be background - curr frame
 	foreground_image = cv2.absdiff(frame_gray,image)
 
 	a = np.array([0],np.uint8)
