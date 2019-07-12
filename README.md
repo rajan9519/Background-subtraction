@@ -4,5 +4,5 @@
 ### 2) Mean filter
 ### 3) Median filter
 ### 4) Median Approximation
-### 5) Running Gaussian
-### 6) adpative gaussian mixture
+### 5) Running Gaussian/single gaussian
+### 6) adpative gaussian mixture (gmm)
