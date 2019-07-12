@@ -16,7 +16,8 @@ while True:
 	ret,frame = cap.read()
 	cv2.imshow('image',frame)
 	dim = (500,500)
-	frame = cv2.resize(frame,dim,interpolation = cv2.INTER_AREA)        
+	frame = cv2.resize(frame,dim,interpolation = cv2.INTER_AREA) 
+#converting images into grayscale       
                                                 
 	
 
