@@ -1,5 +1,8 @@
 # Background-subtracktion
 ## Background Subtraction Methods
+
+During this project we perform different methods for subtracting the background and foreground form the frame of video 
+For this we use python, opencv.and numpy module( matrix operation) 
 ### 1) Frame Differencing
 ### 2) Mean filter
 ### 3) Median filter
