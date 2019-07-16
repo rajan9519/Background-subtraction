@@ -28,8 +28,11 @@ Likewise, if the current pixel is less than the background pixel, the background
 
 ### 5) Running Gaussian Average /single gaussian:
 For every pixel, fit one Gaussian PDF distribution (µ,σ) on the most recent n frames (this gives the background PDF).To accommodate for change in background over time (e.g. due to illumination changes or non-static background objects), at every frame, every pixel's mean and variance must be updated.
+
 ### 6) Gaussian Mixture Model:
 Model each pixel as mixture of gaussians and using an on-line approximation to update the model.The Gaussian distribution of the adaptive mixture model are then evaluate to determine which are most likely to result from background process.Each pixel is classifeid based on whether the gaussian distribution which represents it most effectively is considered part of background model.
+
+![360px-normal-distribution-pdf-svg_orig](https://user-images.githubusercontent.com/50518930/61319551-4bdd5f00-a7bc-11e9-8082-75ee32ff90c8.png)
 
 
 
