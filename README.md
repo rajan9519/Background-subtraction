@@ -12,9 +12,16 @@ Background subtraction is a major preprocessing steps in many vision based appli
 During this project we perform different methods for subtracting background and foreground form the frame of video 
 For this we have used python, opencv and numpy module( matrix operation) 
 
-### 1) Frame Differencing
-### 2) Mean 
-### 3) Median 
+### 1) Frame Differencing:
+This method is through the difference between two consecutive images to determine the presence of moving objects
+### 2) Mean:
+In this method background is estimated by taking mean of the previous N frames. Once background is estimated, foreground is estimated by the difference of background and current frame.
+
+![download (1)](https://user-images.githubusercontent.com/50518930/61317408-c3f55600-a7b7-11e9-9032-6e784cded33d.jpg)
+
+### 3) Median:
+It similar to mean filter method but instead of taking the mean we take the median of n frames
+
 ### 4) Median Approximation
 ### 5) Running Gaussian/single gaussian
 ### 6) Gaussian Mixture Model
