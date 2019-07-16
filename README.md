@@ -1,4 +1,4 @@
-# Background-subtracktion
+# Background-subtraction
 ## Background Subtraction Methods
 
 During this project we perform different methods for subtracting background and foreground form the frame of video 
