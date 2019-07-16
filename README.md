@@ -47,5 +47,8 @@ Background modeling and background subtraction algorithms are very commonly used
 
 ### TEAM MEMBERS
 #### 1) Saurabh Kemekar
+LINKEDIN --https://www.linkedin.com/in/saurabh-kemekar-a8589710b/
+
 #### 2) Rajan Kumar Singh
+LINEDIN--https://www.linkedin.com/in/rajan-kumar-singh-836722b2/
 Website -: www.backsub.weebly.com
