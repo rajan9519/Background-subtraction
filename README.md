@@ -1,6 +1,8 @@
 # Background-subtraction
 ## OVERVIEW
 Background subtraction is a major preprocessing steps in many vision based applications. For example, consider the cases like visitor counter where a static camera takes the number of visitors entering or leaving the room, or a traffic camera extracting information about the vehicles etc.
+![capture (1)](https://user-images.githubusercontent.com/50518930/61316081-0d907180-a7b5-11e9-9b0a-3e1f7508a348.png)
+
 ## Background Subtraction Methods:
 During this project we perform different methods for subtracting background and foreground form the frame of video 
 For this we have used python, opencv and numpy module( matrix operation) 
