@@ -22,9 +22,14 @@ In this method background is estimated by taking mean of the previous N frames. 
 ### 3) Median Filter:
 It similar to mean filter method but instead of taking the mean we take the median of n frames
 
-### 4) Median Approximation
-### 5) Running Gaussian Average /single gaussian
-### 6) Gaussian Mixture Model
+### 4) Median Approximation:
+If a pixel in the current frame has a value larger than the corresponding background pixel, the background pixel is incremented by 1.
+Likewise, if the current pixel is less than the background pixel, the background is decremented by one. The background eventually converges to an actual background.
+
+### 5) Running Gaussian Average /single gaussian:
+For every pixel, fit one Gaussian PDF distribution (µ,σ) on the most recent n frames (this gives the background PDF).To accommodate for change in background over time (e.g. due to illumination changes or non-static background objects), at every frame, every pixel's mean and variance must be updated.
+### 6) Gaussian Mixture Model:
+Model each pixel as mixture of gaussians and using an on-line approximation to update the model.The Gaussian distribution of the adaptive mixture model are then evaluate to determine which are most likely to result from background process.Each pixel is classifeid based on whether the gaussian distribution which represents it most effectively is considered part of background model.
 
 
 
