@@ -41,13 +41,13 @@ Model each pixel as mixture of gaussians and using an on-line approximation to u
 ## APPLICATIONS:
 Background modeling and background subtraction algorithms are very commonly used in vehicle detection systems.
 
-### MENTORS
-#### 1)Abhay Khandelwal
-#### 2) Kalpit Jangid
-
 ### TEAM MEMBERS
 #### 1) Saurabh Kemekar
 
 #### 2) Rajan Kumar Singh
+
+### MENTORS
+#### 1)Abhay Khandelwal
+#### 2) Kalpit Jangid
 
 ###### Website -: www.backsub.weebly.com
