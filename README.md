@@ -1,6 +1,6 @@
 #                                                Background-subtraction
 ## MOTIVTION
-To learn and implement different Backgroound-subtraction method's and understand the concept of Gaussian probability distribution function
+To learn and implement different Background-subtraction method's and understand the concept of Gaussian probability distribution function
 ## AIM
 To implement different background-subtraction method's and also to implement the resarch paper based on  Adpative background-Mixture Modal for real time tracking 
 ## OVERVIEW
