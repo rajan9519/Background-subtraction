@@ -1,9 +1,9 @@
 import cv2
 import numpy as np
-
+# function for trackbar
 def nothing(x):
     pass
-
+# naming the trackbar
 cv2.namedWindow('diff')
 
 # creating trackbar for values to be subtracted
@@ -13,7 +13,7 @@ cv2.createTrackbar('max_val','diff',0,255,nothing)
 # creating video element
 cap = cv2.VideoCapture(0)
 _,frame = cap.read()
-
+# converting the image into grayscale image
 image1 = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
 
 #getting the shape of the frame capture which will be used for creating an array of resultant image which will store the diff
